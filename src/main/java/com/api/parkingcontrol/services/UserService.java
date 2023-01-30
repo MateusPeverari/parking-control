@@ -2,12 +2,13 @@ package com.api.parkingcontrol.services;
 
 import com.api.parkingcontrol.models.UserModel;
 import com.api.parkingcontrol.repositories.UserRepository;
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+@Service
 public class UserService {
     final UserRepository userRepository;
 
