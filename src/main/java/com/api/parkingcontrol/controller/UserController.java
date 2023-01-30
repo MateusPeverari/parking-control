@@ -2,6 +2,7 @@ package com.api.parkingcontrol.controller;
 
 import com.api.parkingcontrol.dtos.UserDto;
 import com.api.parkingcontrol.models.UserModel;
+import com.api.parkingcontrol.repositories.UserRepository;
 import com.api.parkingcontrol.services.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,12 @@ import java.util.UUID;
 @RequestMapping("/user")
 public class UserController {
     final UserService userService;
+    private final UserRepository userRepository;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+                          UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -48,6 +52,17 @@ public class UserController {
         Optional<UserModel> userModelOptional = userService.findById(id);
         if (userModelOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.OK).body(userModelOptional.get());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteUser(@PathVariable(value = "id") UUID id) {
+        Optional<UserModel> userModelOptional = userService.findById(id);
+        if (userModelOptional.isPresent()) {
+            userRepository.delete(userModelOptional.get());
+            return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
     }
