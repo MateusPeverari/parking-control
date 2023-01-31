@@ -66,4 +66,22 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateUser(@PathVariable(value = "id") UUID id,
+                                                    @RequestBody @Valid UserDto userDto) {
+        Optional<UserModel> userModelOptional = userService.findById(id);
+        if (userModelOptional.isPresent()) {
+            var userModel = new UserModel();
+            BeanUtils.copyProperties(userDto, userModel);
+            BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+            String passwordEncode = bCryptPasswordEncoder.encode(userModel.getPassword());
+            userModel.setPassword(passwordEncode);
+            userModel.setId(userModelOptional.get().getId());
+            return ResponseEntity.status(HttpStatus.OK).body(userService.save(userModel));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    }
+
 }
